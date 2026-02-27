@@ -1,0 +1,1092 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tests (3 documentos) – Banco aleatorio</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#121a33;
+      --card2:#0f1730;
+      --text:#eaf0ff;
+      --muted:#a9b4d0;
+      --ok:#2ee59d;
+      --bad:#ff5a7a;
+      --accent:#7c5cff;
+      --accent2:#00d4ff;
+      --border:rgba(255,255,255,.10);
+      --shadow: 0 16px 40px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      background: radial-gradient(1200px 600px at 15% 10%, rgba(124,92,255,.35), transparent 60%),
+                  radial-gradient(1200px 600px at 85% 10%, rgba(0,212,255,.25), transparent 55%),
+                  radial-gradient(1000px 700px at 50% 100%, rgba(46,229,157,.12), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+    header{
+      padding:24px 18px 10px;
+      max-width:1100px;
+      margin:0 auto;
+    }
+    .topline{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    h1{
+      margin:0;
+      font-size:20px;
+      letter-spacing:.2px;
+      font-weight:800;
+    }
+    .subtitle{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.35;
+      max-width:900px;
+    }
+    main{
+      max-width:1100px;
+      margin:0 auto;
+      padding:12px 18px 34px;
+      display:grid;
+      gap:16px;
+      grid-template-columns: 320px 1fr;
+    }
+    @media (max-width: 880px){
+      main{grid-template-columns: 1fr;}
+    }
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panel .inner{padding:16px;}
+    .navTitle{font-size:14px; font-weight:800; margin:0 0 10px;}
+    .tablist{display:grid; gap:10px;}
+    .tabBtn{
+      width:100%;
+      text-align:left;
+      border:1px solid var(--border);
+      background: rgba(18,26,51,.55);
+      color:var(--text);
+      padding:12px 12px;
+      border-radius:14px;
+      cursor:pointer;
+      transition: transform .06s ease, background .2s ease, border-color .2s ease;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .tabBtn:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.20);}
+    .tabBtn.active{
+      background: linear-gradient(180deg, rgba(124,92,255,.35), rgba(18,26,51,.65));
+      border-color: rgba(124,92,255,.55);
+    }
+    .tabBtn .badge{
+      width:34px;height:34px;border-radius:12px;
+      display:grid;place-items:center;
+      background: rgba(124,92,255,.20);
+      border:1px solid rgba(124,92,255,.35);
+      font-weight:900;
+    }
+    .tabBtn .tmeta{flex:1}
+    .tabBtn .tmeta .tname{font-weight:900; font-size:13px; margin:0}
+    .tabBtn .tmeta .tdesc{font-size:12px;color:var(--muted); margin:4px 0 0; line-height:1.25}
+    .smallRow{
+      margin-top:14px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .pill{
+      border:1px solid var(--border);
+      background: rgba(18,26,51,.35);
+      color:var(--muted);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:12px;
+    }
+    .input{
+      width:100%;
+      border:1px solid var(--border);
+      background: rgba(10,16,32,.55);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      outline:none;
+    }
+    .btn{
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(18,26,51,.5);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:800;
+      transition: transform .06s ease, border-color .2s ease, background .2s ease;
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.28);}
+    .btn.primary{
+      border-color: rgba(124,92,255,.6);
+      background: linear-gradient(180deg, rgba(124,92,255,.55), rgba(124,92,255,.25));
+    }
+    .btn.danger{
+      border-color: rgba(255,90,122,.55);
+      background: linear-gradient(180deg, rgba(255,90,122,.35), rgba(18,26,51,.5));
+    }
+    .contentHeader{
+      padding:16px 16px 0;
+      border-bottom:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), transparent);
+    }
+    .contentHeader .row{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    }
+    .contentHeader h2{margin:0; font-size:16px; font-weight:950;}
+    .contentHeader .hint{margin:6px 0 14px; color:var(--muted); font-size:12px; line-height:1.3}
+    .progressWrap{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:0 16px 14px;
+    }
+    .bar{
+      height:10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.12);
+      overflow:hidden;
+      flex:1;
+      min-width:220px;
+    }
+    .bar > div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(124,92,255,.9), rgba(0,212,255,.85));
+      border-radius:999px;
+      transition: width .25s ease;
+    }
+    .kpi{font-size:12px; color:var(--muted); white-space:nowrap}
+    .qbox{padding:16px;}
+    .qcard{
+      background: rgba(18,26,51,.35);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding:14px;
+    }
+    .qtitle{
+      font-weight:950;
+      margin:0 0 10px;
+      line-height:1.25;
+      font-size:15px;
+    }
+    .opts{display:grid; gap:10px; margin-top:10px;}
+    .opt{
+      text-align:left;
+      background: rgba(10,16,32,.45);
+      border:1px solid rgba(255,255,255,.14);
+      color:var(--text);
+      padding:12px 12px;
+      border-radius:14px;
+      cursor:pointer;
+      transition: transform .06s ease, border-color .2s ease, background .2s ease;
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .opt:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.24);}
+    .opt .letter{
+      width:28px; height:28px;
+      border-radius:10px;
+      display:grid; place-items:center;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      font-weight:900;
+      flex:0 0 auto;
+      margin-top:1px;
+    }
+    .opt.correct{
+      border-color: rgba(46,229,157,.55);
+      background: rgba(46,229,157,.10);
+    }
+    .opt.wrong{
+      border-color: rgba(255,90,122,.55);
+      background: rgba(255,90,122,.10);
+    }
+    .feedback{
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(18,26,51,.30);
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.35;
+    }
+    .feedback strong{color:var(--text)}
+    .footerRow{
+      display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .right{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    .review{
+      margin-top:14px;
+      display:grid; gap:10px;
+    }
+    .reviewItem{
+      border:1px solid var(--border);
+      background: rgba(18,26,51,.25);
+      border-radius:16px;
+      padding:12px;
+    }
+    .reviewItem .mini{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:6px;
+      line-height:1.35;
+    }
+    .tag{
+      display:inline-block;
+      font-size:11px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color:var(--muted);
+      margin-right:8px;
+    }
+    .tag.ok{border-color: rgba(46,229,157,.5); color: rgba(46,229,157,.95); background: rgba(46,229,157,.10)}
+    .tag.bad{border-color: rgba(255,90,122,.5); color: rgba(255,90,122,.95); background: rgba(255,90,122,.10)}
+    .muted{color:var(--muted)}
+    .divider{height:1px;background:var(--border);margin:12px 0}
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="topline">
+    <h1>App web – Tests por documento (banco aleatorio)</h1>
+    <span class="pill" id="sessionPill">Sesión: —</span>
+  </div>
+  <p class="subtitle">
+    Selecciona un documento, escribe tu nombre (opcional) y empieza el test. Cada inicio genera un conjunto aleatorio.
+  </p>
+</header>
+
+<main>
+  <!-- Left panel -->
+  <section class="panel">
+    <div class="inner">
+      <p class="navTitle">Documentos</p>
+      <div class="tablist" id="tablist"></div>
+
+      <div class="divider"></div>
+
+      <label class="muted" for="playerName" style="font-size:12px;font-weight:800">Nombre (opcional)</label>
+      <input id="playerName" class="input" placeholder="Ej: Álvaro" />
+
+      <div class="smallRow">
+        <span class="pill" id="bankInfo">Banco: —</span>
+        <button class="btn" id="newSessionBtn" title="Genera nuevo identificador de sesión">Nueva sesión</button>
+      </div>
+
+      <div class="smallRow">
+        <button class="btn primary" id="startBtn">Iniciar test</button>
+        <button class="btn danger" id="resetBtn">Reiniciar</button>
+      </div>
+
+      <p class="subtitle" style="margin-top:12px">
+        Consejo: si quieres que “al abrir la página” cambien automáticamente, solo recarga (F5).
+      </p>
+    </div>
+  </section>
+
+  <!-- Right panel -->
+  <section class="panel">
+    <div class="contentHeader">
+      <div class="row">
+        <div>
+          <h2 id="docTitle">—</h2>
+          <div class="hint" id="docHint">—</div>
+        </div>
+        <span class="pill" id="quizMode">Modo: —</span>
+      </div>
+      <div class="progressWrap">
+        <div class="bar" aria-label="Progreso del test"><div id="barFill"></div></div>
+        <div class="kpi" id="kpi">0/0 • Puntaje: 0</div>
+      </div>
+    </div>
+
+    <div class="qbox">
+      <div class="qcard" id="card">
+        <p class="qtitle" id="qtitle">Selecciona un documento y presiona “Iniciar test”.</p>
+        <div class="opts" id="opts"></div>
+        <div class="feedback" id="feedback" style="display:none"></div>
+
+        <div class="footerRow">
+          <span class="pill" id="qTag">—</span>
+          <div class="right">
+            <button class="btn" id="skipBtn" style="display:none">Saltar</button>
+            <button class="btn primary" id="nextBtn" style="display:none">Siguiente</button>
+          </div>
+        </div>
+
+        <div class="review" id="review" style="display:none"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+/** =========================================================
+ *  1) Bancos de preguntas (3 documentos)
+ *  Formato:
+ *  { id, type: "mcq"|"tf", q, options?, answer, explain, sourceTag }
+ * ========================================================= */
+
+const BANKS = [
+  {
+    key: "plan",
+    name: "Plan de emergencias",
+    short: "Pág. 4–5",
+    hint: "Solo páginas 4 y 5: flujograma de información y procedimientos específicos.",
+    pick: 10,
+    questions: [
+      { id:"plan1", type:"mcq",
+        q:"¿Quién debe informar las áreas que quedan cargadas durante el turno nocturno a la Central de Información (Base 1) y Base 20?",
+        options:["Operador de camión de emulsión","Supervisor de Voladura/Perforación (P&V)","Brigadista del área","TAE-CAE"],
+        answer:1,
+        explain:"La medida preventiva indica que el Supervisor de Voladura/Perforación debe informar a Base 1 y Base 20.",
+        sourceTag:"Plan (pág. 5)"
+      },
+      { id:"plan2", type:"tf",
+        q:"Se pueden dejar áreas cargadas totalmente amarradas durante la noche.",
+        options:["Verdadero","Falso"],
+        answer:1,
+        explain:"El plan indica que nunca se deben dejar áreas cargadas totalmente amarradas durante la noche.",
+        sourceTag:"Plan (pág. 5)"
+      },
+      { id:"plan3", type:"mcq",
+        q:"En presencia de tiempo nublado, ¿qué se debe hacer para monitorear posibles descargas eléctricas cercanas?",
+        options:["Suspender todas las voladuras por 24 horas","Monitorear con ayuda de un detector de tormentas y retirar personal del área de influencia","Solo informar a Base 20 por correo","Evacuar únicamente a los visitantes"],
+        answer:1,
+        explain:"Se debe monitorear con un detector de tormentas y retirar al personal dentro del área de influencia según el procedimiento.",
+        sourceTag:"Plan (pág. 5)"
+      },
+      { id:"plan4", type:"mcq",
+        q:"¿Qué debe hacer el Supervisor de Voladura ante presencia de tormentas eléctricas o pozos en combustión?",
+        options:["Coordinar evacuación y bloqueo del área de influencia","Solo tomar fotos y reportar al final del turno","Ordenar el disparo inmediato sin avisos","Permitir ingreso controlado sin bloqueos"],
+        answer:0,
+        explain:"El plan establece que debe coordinar evacuación y bloqueo del área de influencia de las áreas cargadas.",
+        sourceTag:"Plan (pág. 5)"
+      },
+      { id:"plan5", type:"mcq",
+        q:"Al notificar a Central de Emergencia, ¿cuál información NO hace parte explícita de lo solicitado?",
+        options:["Áreas a evacuar","Hora de inicio de evacuación y bloqueo","Niveles afectados","Marca del explosivo utilizado"],
+        answer:3,
+        explain:"Se solicita áreas a evacuar, hora de inicio, niveles afectados y datos del coordinador (nombre/localización/frecuencia), no la marca del explosivo.",
+        sourceTag:"Plan (pág. 5)"
+      },
+      { id:"plan6", type:"mcq",
+        q:"Según el plan, al desalojar la zona de influencia del área cargada, ¿cuáles son las distancias indicadas?",
+        options:["Personal 300 m / Equipo 30 m","Personal 750 m / Equipo 70 m","Personal 1000 m / Equipo 200 m","Personal 150 m / Equipo 150 m"],
+        answer:1,
+        explain:"El plan define 750 m para personal y 70 m para equipos alrededor del área de voladura cargada.",
+        sourceTag:"Plan (pág. 5)"
+      },
+      { id:"plan7", type:"tf",
+        q:"Solo quien ordena la evacuación y el bloqueo puede autorizar la normalización de operaciones.",
+        options:["Verdadero","Falso"],
+        answer:0,
+        explain:"La nota del plan lo indica de forma explícita.",
+        sourceTag:"Plan (pág. 5)"
+      },
+      { id:"plan8", type:"mcq",
+        q:"En los procedimientos específicos, ¿quién es responsable de comunicar a Central de información y Base 1 la ubicación exacta y solicitar evacuación/activación del plan?",
+        options:["Persona de P&V que detecta o a quien reportan la emergencia","Gerente de zona","Operador externo a voladura","Personal de QA/QC"],
+        answer:0,
+        explain:"El paso 1 asigna esta responsabilidad a la persona de P&V que detecta o recibe el reporte.",
+        sourceTag:"Plan (pág. 5)"
+      },
+      { id:"plan9", type:"mcq",
+        q:"¿Qué acción corresponde a retirar inmediatamente camionetas de transporte de explosivos y camiones de agentes de voladura?",
+        options:["Paso de aislamiento de área por bloqueos","Paso de retiro de equipos de transporte del área","Paso de primeros auxilios","Paso de evaluación de recurrencia"],
+        answer:1,
+        explain:"El procedimiento indica retirar de inmediato estos vehículos del área afectada.",
+        sourceTag:"Plan (pág. 5)"
+      },
+      { id:"plan10", type:"mcq",
+        q:"En el flujograma de llamadas, Base 1 (despachador principal) debe coordinar comunicaciones siguiendo este flujo. ¿Cuál es el orden inicial correcto?",
+        options:[
+          "Brigada → Central de Información → TAEs",
+          "Central de Información → Brigada → Grupo de Emergencias (TAEs)",
+          "TAEs → Gerentes → Central de Información",
+          "Superintendente de Tajo → Brigada → Central de Información"
+        ],
+        answer:1,
+        explain:"En el flujo mostrado se inicia con Central de Información, luego Brigada y después Grupo de Emergencias (TAEs).",
+        sourceTag:"Plan (pág. 4)"
+      },
+      { id:"plan11", type:"mcq",
+        q:"¿Qué medida preventiva se menciona respecto a detectores de tormentas eléctricas?",
+        options:["Solo el CADE debe tener uno","Dotar a cada grupo de voladura con detectores y entrenar al personal","Usarlos únicamente cuando haya lluvia","Reemplazarlos por radios trunking"],
+        answer:1,
+        explain:"Se indica dotar de detectores a cada grupo y entrenar al personal en su uso.",
+        sourceTag:"Plan (pág. 5)"
+      },
+      { id:"plan12", type:"tf",
+        q:"Dentro del flujograma de comunicaciones, después de TAEs se contacta al Superintendente de Turno (APS) y luego al Superintendente de Tajo.",
+        options:["Verdadero","Falso"],
+        answer:0,
+        explain:"El flujo listado incluye Superintendente de Turno (APS) y Superintendente de Tajo luego del grupo de emergencias.",
+        sourceTag:"Plan (pág. 4)"
+      },
+    ]
+  },
+
+  {
+    key: "lista",
+    name: "Lista de verificación",
+    short: "Pág. 1–3",
+    hint: "Todas las páginas: verificación de condiciones, preparación para emergencia, autorizaciones, cierre y competencias mínimas.",
+    pick: 12,
+    questions: [
+      { id:"lv1", type:"tf",
+        q:"La lista de verificación aplica al cargue en áreas calientes (pozos entre 45.1°C y 70°C).",
+        options:["Verdadero","Falso"],
+        answer:0,
+        explain:"El encabezado del formato lo especifica.",
+        sourceTag:"Lista (pág. 1)"
+      },
+      { id:"lv2", type:"mcq",
+        q:"Antes de iniciar, ¿se debe contar con la Guía de Cargue de Pozos (PPF10-ES01-GU09) para la actividad?",
+        options:["Sí","No","Solo si lo pide QA/QC","Solo si se trabaja de día"],
+        answer:0,
+        explain:"Es el requerimiento #1 en condiciones previas.",
+        sourceTag:"Lista (pág. 1)"
+      },
+      { id:"lv3", type:"mcq",
+        q:"¿Qué herramienta de análisis se menciona como verificación previa durante la ejecución de la tarea?",
+        options:["TOMA 5 o ASST","Matriz DOFA","PMI Charter","Six Sigma DMAIC"],
+        answer:0,
+        explain:"El ítem #2 solicita realizar TOMA 5 o ASST.",
+        sourceTag:"Lista (pág. 1)"
+      },
+      { id:"lv4", type:"tf",
+        q:"Durante la tarea, debe haber un Supervisor de P&V permanentemente en el área de cargue.",
+        options:["Verdadero","Falso"],
+        answer:0,
+        explain:"Es el requerimiento #4.",
+        sourceTag:"Lista (pág. 1)"
+      },
+      { id:"lv5", type:"mcq",
+        q:"¿A quién se debe informar, según la lista, antes de iniciar (entre otros)?",
+        options:["Solo al operador de voladura","Al Superintendente de P&V","Solo a Base 20","A proveedores externos"],
+        answer:1,
+        explain:"El requerimiento #5 pregunta si se informó al Superintendente de P&V.",
+        sourceTag:"Lista (pág. 1)"
+      },
+      { id:"lv6", type:"mcq",
+        q:"¿Qué instrumentos se mencionan para medir temperatura y cuyo procedimiento se debe repasar?",
+        options:["Termómetro clínico y barómetro","Pistola térmica, termosonda y monitor MK8","GPS y brújula","Anemómetro y veleta"],
+        answer:1,
+        explain:"El ítem #8 los enumera explícitamente.",
+        sourceTag:"Lista (pág. 1)"
+      },
+      { id:"lv7", type:"tf",
+        q:"La lista pide verificar calibración de la termocupla y del monitor MK8.",
+        options:["Verdadero","Falso"],
+        answer:0,
+        explain:"Es el requerimiento #9.",
+        sourceTag:"Lista (pág. 1)"
+      },
+      { id:"lv8", type:"mcq",
+        q:"¿Cuántas mediciones de temperatura se deben tomar y registrar en estacas antes de cargar explosivos?",
+        options:["Una (1)","Dos (2)","Tres (3)","Cinco (5)"],
+        answer:2,
+        explain:"El ítem #10 habla de tres (3) mediciones.",
+        sourceTag:"Lista (pág. 2)"
+      },
+      { id:"lv9", type:"mcq",
+        q:"¿Quién realiza la tercera medición de temperatura con el monitor MK8?",
+        options:["El operador externo","El equipo QAQC o delegado por la superintendencia","Un visitante autorizado","El conductor del camión"],
+        answer:1,
+        explain:"El ítem #11 lo especifica.",
+        sourceTag:"Lista (pág. 2)"
+      },
+      { id:"lv10", type:"mcq",
+        q:"En EPP especiales, ¿cuál elemento aparece explícitamente (si aplica por humos tóxicos)?",
+        options:["Casco de moto","Mascara antigases","Botas de caucho para lluvia","Arnés de escalada"],
+        answer:1,
+        explain:"El ítem #13 menciona máscara antigases para presencia de humos tóxicos, si aplica.",
+        sourceTag:"Lista (pág. 2)"
+      },
+      { id:"lv11", type:"tf",
+        q:"Se debe contar con radio de comunicación doble vía (o medio adecuado) y verificar el sistema.",
+        options:["Verdadero","Falso"],
+        answer:0,
+        explain:"Es el ítem #15.",
+        sourceTag:"Lista (pág. 2)"
+      },
+      { id:"lv12", type:"mcq",
+        q:"En preparación para emergencia, ¿qué se pide sobre bloqueos temporales?",
+        options:["No se requieren bloqueos","Plan de bloqueos temporal usando personal de P&V hasta bloqueos oficiales del proceso BED","Solo bloquear con conos de tránsito","Bloquear únicamente al final"],
+        answer:1,
+        explain:"El ítem #2 de preparación para emergencia lo indica.",
+        sourceTag:"Lista (pág. 2)"
+      },
+      { id:"lv13", type:"mcq",
+        q:"¿Cuáles números de emergencia aparecen en la lista?",
+        options:["Bomberos 5050/5536; Primeros Auxilios 5098; Canal 911","Bomberos 123; Canal 01","Emergencias 999; Canal 77","Bomberos 555; Canal 404"],
+        answer:0,
+        explain:"El ítem #5 de preparación para emergencia los lista.",
+        sourceTag:"Lista (pág. 2)"
+      },
+      { id:"lv14", type:"tf",
+        q:"Para el cierre (entrega del equipo a operación), solo se acepta 'SI' para el cierre.",
+        options:["Verdadero","Falso"],
+        answer:0,
+        explain:"En el apartado de cierre se indica que solo se acepta SI.",
+        sourceTag:"Lista (pág. 3)"
+      },
+      { id:"lv15", type:"mcq",
+        q:"En competencias mínimas exigidas, ¿qué roles aparecen en la tabla?",
+        options:["Usuarios, Líder de tarea, Persona que autoriza","Cliente, Proveedor, Auditor","Operador de grúa, Piloto, Médico","Gerente, Contador, Abogado"],
+        answer:0,
+        explain:"La tabla muestra esos tres roles.",
+        sourceTag:"Lista (pág. 3)"
+      }
+    ]
+  },
+
+  {
+    key: "pozos",
+    name: "Cargue de pozos calientes",
+    short: "Ítems 3.8–3.12 + 3.16 + 5",
+    hint: "Incluye: controles en áreas calientes/subsidencia, mediciones T1–T3, señalización por colores, tapado/amarre, manejo de pozos prendidos y >70°C, humo y gases, y responsabilidades.",
+    pick: 14,
+    questions: [
+      { id:"pz1", type:"mcq",
+        q:"Antes de ingresar a áreas con potencial presencia de material caliente, ¿qué se debe verificar?",
+        options:[
+          "Que el camión tenga combustible lleno",
+          "Con el supervisor de perforación la info actualizada sobre zonas calientes y/o subsidencia",
+          "Que el viento esté en contra",
+          "Que ya se firmó el cierre del checklist"
+        ],
+        answer:1,
+        explain:"La guía indica verificar con el supervisor de perforación la información actualizada.",
+        sourceTag:"Guía (3.8)"
+      },
+      { id:"pz2", type:"mcq",
+        q:"¿Qué porcentaje del área se debe medir con pistola térmica para autorizar tránsito/trabajo?",
+        options:["10%","50%","80%","100%"],
+        answer:3,
+        explain:"Se indica medir el 100% del área y solo autorizar tránsito/trabajo si ≤ 70°C.",
+        sourceTag:"Guía (3.8)"
+      },
+      { id:"pz3", type:"tf",
+        q:"Se autoriza el tránsito y trabajo en áreas con temperatura ≤ 70 °C.",
+        options:["Verdadero","Falso"],
+        answer:0,
+        explain:"La guía lo establece explícitamente.",
+        sourceTag:"Guía (3.8)"
+      },
+      { id:"pz4", type:"mcq",
+        q:"Sobre 'Área de Subsidencia', ¿qué afirma la guía?",
+        options:[
+          "Se permite ingreso con permiso verbal",
+          "Está prohibido el ingreso; debe contar con berma mínima de 1.5 m y a 10 m del manto en combustión (cuando aplique)",
+          "Solo se ingresa con casco blanco",
+          "No requiere demarcación"
+        ],
+        answer:1,
+        explain:"Prohíbe ingreso y define condición de berma/distancia cuando aplique.",
+        sourceTag:"Guía (3.8)"
+      },
+      { id:"pz5", type:"mcq",
+        q:"En inspección de taludes, ¿qué distancia mínima se menciona (Regla 10/7)?",
+        options:[
+          "1/3 de la altura del talud",
+          "2/3 de la altura del talud",
+          "Igual a la altura del talud",
+          "No aplica para áreas calientes"
+        ],
+        answer:1,
+        explain:"La guía menciona ubicarse a distancia igual o mayor a 2/3 de la altura del talud (Regla 10/7), cuando aplique.",
+        sourceTag:"Guía (3.8)"
+      },
+      { id:"pz6", type:"mcq",
+        q:"En la primera medición de temperatura (T1), ¿dónde se registra la lectura?",
+        options:[
+          "Solo en un cuaderno personal",
+          "En el formato FO-PD-PV-V033 y en la estaca identificada como Temperatura 1",
+          "Únicamente en radio trunking",
+          "Solo en la base de datos del camión"
+        ],
+        answer:1,
+        explain:"T1 se registra en FO-PD-PV-V033 y en la estaca como Temperatura 1.",
+        sourceTag:"Guía (3.8.6)"
+      },
+      { id:"pz7", type:"tf",
+        q:"Si la primera medición (T1) se hizo con más de un día de anticipación al cargue, debe repetirse.",
+        options:["Verdadero","Falso"],
+        answer:0,
+        explain:"La guía indica repetir porque la temperatura puede incrementar con el tiempo; la última lectura será la T1 válida.",
+        sourceTag:"Guía (3.8.6)"
+      },
+      { id:"pz8", type:"mcq",
+        q:"En T2, ¿cuándo debe realizarse como máximo y con qué instrumentos?",
+        options:[
+          "Máximo una semana antes, con termómetro clínico",
+          "Máximo en el turno nocturno previo al día del disparo, con termosonda calibrada o MK8",
+          "Solo el mismo día del disparo, con brújula",
+          "Cuando lo decida el operador externo, con pistola de agua"
+        ],
+        answer:1,
+        explain:"T2: máximo turno nocturno previo al disparo; con termosonda calibrada o MK8, tomando la temperatura más alta del pozo.",
+        sourceTag:"Guía (3.8.6)"
+      },
+      { id:"pz9", type:"mcq",
+        q:"En señalización por colores, ¿qué corresponde a 55.1 – 70.0 °C?",
+        options:[
+          "Estaca sin penacho",
+          "Estaca con penacho (rojo)",
+          "Estaca con penacho doble (rojo y blanco)",
+          "Estaca con penacho triple (blanco, azul y rojo)"
+        ],
+        answer:2,
+        explain:"55.1–70.0°C: estaca con penacho doble, rojo y blanco (requiere T1, T2, T3).",
+        sourceTag:"Guía (3.8.6.2)"
+      },
+      { id:"pz10", type:"mcq",
+        q:"En tapado (3.9.1), ¿qué indica la guía para pozos entre 45.1 y 55 °C?",
+        options:[
+          "Tapado según diseño sin cambios",
+          "Tapar con 2 metros de material con tapabarreno o pala manual",
+          "Tapado manual con 1 metro, sin accesorios",
+          "No se deben tapar"
+        ],
+        answer:1,
+        explain:"45.1–55°C: 2 m de material con tapabarreno o pala manual.",
+        sourceTag:"Guía (3.9.1)"
+      },
+      { id:"pz11", type:"mcq",
+        q:"En amarre (3.9.2), ¿cómo se recomienda realizarlo?",
+        options:[
+          "Amarrar todo al final, sin dividir zonas",
+          "Primero amarrar pozos de temperatura normal y al final la zona caliente, sin colocar retardos sobre superficie caliente",
+          "Amarrar solo la zona caliente y después la normal",
+          "No amarrar en voladuras calientes"
+        ],
+        answer:1,
+        explain:"La guía pide amarre en dos partes: normal primero, luego zona caliente, cuidando retardos en superficies calientes.",
+        sourceTag:"Guía (3.9.2)"
+      },
+      { id:"pz12", type:"mcq",
+        q:"Si aparecen pozos con indicios de combustión (aumento de temperatura, humo o vapor), ¿qué se debe hacer?",
+        options:[
+          "Continuar el cargue para terminar rápido",
+          "Activar el plan PRE-PD-001 e informar al supervisor de voladuras",
+          "Cubrir el pozo con plástico y seguir",
+          "Solo reportar al final del turno"
+        ],
+        answer:1,
+        explain:"Se indica activar PRE-PD-001 e informar al supervisor de voladuras.",
+        sourceTag:"Guía (3.10)"
+      },
+      { id:"pz13", type:"mcq",
+        q:"Si por error se cargó un pozo con temperatura mayor a 70 °C, ¿cuál es una acción inmediata indicada?",
+        options:[
+          "Ignorar y seguir porque ya está cargado",
+          "Notificar de inmediato al supervisor de voladura, líder de tabla y coordinador",
+          "Solo avisar a higiene industrial",
+          "Apagar el pozo con agua sin avisar"
+        ],
+        answer:1,
+        explain:"La guía exige notificación inmediata a supervisor, líder de tabla y coordinador.",
+        sourceTag:"Guía (3.11)"
+      },
+      { id:"pz14", type:"mcq",
+        q:"En presencia de humos o gases (3.16), ¿qué soporte se debe solicitar?",
+        options:[
+          "Soporte de marketing",
+          "Soporte de higiene industrial para medición de la atmósfera",
+          "Soporte de contabilidad",
+          "Soporte de redes sociales"
+        ],
+        answer:1,
+        explain:"La guía indica solicitar higiene industrial para medir la atmósfera cuando haya humos o gases.",
+        sourceTag:"Guía (3.16)"
+      },
+      { id:"pz15", type:"mcq",
+        q:"En 3.16, ¿qué medida de protección respiratoria aparece explícitamente?",
+        options:[
+          "Tapabocas de tela",
+          "Respirador con válvula y filtro de carbón N95 ref. 8214 o medio rostro serie 6000 con filtro P100",
+          "Careta de soldadura",
+          "Gafas de sol"
+        ],
+        answer:1,
+        explain:"Se especifican esas referencias de respiradores/filtros.",
+        sourceTag:"Guía (3.16)"
+      },
+      { id:"pz16", type:"mcq",
+        q:"¿Cada cuánto tiempo sugiere la guía rotar personal entre área contaminada y área normal (3.16)?",
+        options:["Cada 10 minutos","Cada 30 minutos","Cada 2 horas","No se rota"],
+        answer:1,
+        explain:"Se recomienda relevar cada 30 minutos para menor exposición.",
+        sourceTag:"Guía (3.16)"
+      },
+      { id:"pz17", type:"mcq",
+        q:"En responsabilidades (5), el Operador líder de tabla debe asegurar mediciones con:",
+        options:[
+          "Solo pistola térmica",
+          "Pistola térmica (1ª), termosonda (2ª) y MK8 (3ª), registrando en FO-PD-PV-V033 y sistemas",
+          "Solo MK8",
+          "Solo inspección visual"
+        ],
+        answer:1,
+        explain:"La guía detalla las tres mediciones y sus instrumentos, además del registro.",
+        sourceTag:"Guía (5)"
+      },
+      { id:"pz18", type:"tf",
+        q:"El Supervisor de voladura, durante el cargue de pozos calientes, es responsable del plan de respuesta de emergencia PRE-PD-001.",
+        options:["Verdadero","Falso"],
+        answer:0,
+        explain:"En responsabilidades se indica que el supervisor es responsable del plan PRE-PD-001 durante el proceso.",
+        sourceTag:"Guía (5)"
+      },
+      { id:"pz19", type:"mcq",
+        q:"Según responsabilidades (5), ¿qué debe contener el informe del procedimiento de cargue de pozos calientes?",
+        options:[
+          "Solo fotos del área",
+          "Checklist FO02, formato FO-PD-PV-V033 y ASST, además registrar/cargar en Blast IQ",
+          "Solo firma del gerente",
+          "Solo un mensaje por radio"
+        ],
+        answer:1,
+        explain:"Se exige incluir lista de verificación FO02, control de temperatura FO-PD-PV-V033, ASST y cargar en Blast IQ.",
+        sourceTag:"Guía (5)"
+      },
+      { id:"pz20", type:"tf",
+        q:"En 3.16 se recomienda hacer TOMA 5 y ASST y socializar los riesgos de inhalación de humos y gases.",
+        options:["Verdadero","Falso"],
+        answer:0,
+        explain:"Las consideraciones de 3.16 lo incluyen explícitamente.",
+        sourceTag:"Guía (3.16)"
+      }
+    ]
+  }
+];
+
+/** =========================================================
+ *  2) Utilidades
+ * ========================================================= */
+
+function uid(){
+  return Math.random().toString(16).slice(2,10).toUpperCase();
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
+function letters(i){ return ["A","B","C","D"][i] || ""; }
+
+function greetName(){
+  const name = (document.querySelector("#playerName").value || "").trim();
+  return name ? `, ${name}` : "";
+}
+
+/** =========================================================
+ *  3) Estado del quiz
+ * ========================================================= */
+let activeKey = "plan";
+let sessionId = uid();
+let quiz = null; // { bankKey, qset, idx, score, answered, history:[] }
+
+const els = {
+  tablist: document.querySelector("#tablist"),
+  sessionPill: document.querySelector("#sessionPill"),
+  bankInfo: document.querySelector("#bankInfo"),
+  docTitle: document.querySelector("#docTitle"),
+  docHint: document.querySelector("#docHint"),
+  quizMode: document.querySelector("#quizMode"),
+  barFill: document.querySelector("#barFill"),
+  kpi: document.querySelector("#kpi"),
+  qtitle: document.querySelector("#qtitle"),
+  opts: document.querySelector("#opts"),
+  feedback: document.querySelector("#feedback"),
+  qTag: document.querySelector("#qTag"),
+  startBtn: document.querySelector("#startBtn"),
+  resetBtn: document.querySelector("#resetBtn"),
+  newSessionBtn: document.querySelector("#newSessionBtn"),
+  nextBtn: document.querySelector("#nextBtn"),
+  skipBtn: document.querySelector("#skipBtn"),
+  review: document.querySelector("#review"),
+};
+
+/** =========================================================
+ *  4) Render Tabs
+ * ========================================================= */
+function renderTabs(){
+  els.tablist.innerHTML = "";
+  BANKS.forEach((b,idx)=>{
+    const btn = document.createElement("button");
+    btn.className = "tabBtn" + (b.key===activeKey ? " active" : "");
+    btn.innerHTML = `
+      <div class="badge">${idx+1}</div>
+      <div class="tmeta">
+        <p class="tname">${b.name}</p>
+        <p class="tdesc">${b.short} • Banco: ${b.questions.length} preguntas</p>
+      </div>
+    `;
+    btn.addEventListener("click", ()=>{
+      activeKey = b.key;
+      renderTabs();
+      updateHeader();
+      softResetView();
+    });
+    els.tablist.appendChild(btn);
+  });
+}
+
+/** =========================================================
+ *  5) Header / Progress
+ * ========================================================= */
+function getBank(){
+  return BANKS.find(b=>b.key===activeKey);
+}
+function updateHeader(){
+  const bank = getBank();
+  els.docTitle.textContent = bank.name;
+  els.docHint.textContent = bank.hint;
+  els.bankInfo.textContent = `Banco: ${bank.questions.length}`;
+  els.sessionPill.textContent = `Sesión: ${sessionId}`;
+  els.quizMode.textContent = quiz ? `Preguntas: ${quiz.qset.length}` : "Modo: —";
+}
+
+function updateProgress(){
+  if(!quiz){
+    els.barFill.style.width = "0%";
+    els.kpi.textContent = `0/0 • Puntaje: 0`;
+    return;
+  }
+  const total = quiz.qset.length;
+  const cur = clamp(quiz.idx+1, 0, total);
+  const pct = total ? Math.round((cur-1)/total*100) : 0;
+  els.barFill.style.width = `${pct}%`;
+  els.kpi.textContent = `${Math.min(quiz.idx, total)}/${total} • Puntaje: ${quiz.score}`;
+}
+
+/** =========================================================
+ *  6) Quiz control
+ * ========================================================= */
+function buildQuiz(){
+  const bank = getBank();
+  const qset = shuffle(bank.questions).slice(0, bank.pick);
+  quiz = {
+    bankKey: bank.key,
+    qset,
+    idx: 0,
+    score: 0,
+    answered: false,
+    history: [] // {id, chosen, correct, q, options, answer, explain, sourceTag}
+  };
+  els.review.style.display = "none";
+  updateHeader();
+  renderQuestion();
+}
+
+function softResetView(){
+  quiz = null;
+  els.qtitle.textContent = "Selecciona un documento y presiona “Iniciar test”.";
+  els.opts.innerHTML = "";
+  els.feedback.style.display = "none";
+  els.nextBtn.style.display = "none";
+  els.skipBtn.style.display = "none";
+  els.qTag.textContent = "—";
+  updateHeader();
+  updateProgress();
+}
+
+function endQuiz(){
+  const total = quiz.qset.length;
+  const name = greetName();
+  const pct = total ? Math.round((quiz.score/total)*100) : 0;
+
+  els.qtitle.textContent = `Resultado${name}: ${quiz.score}/${total} (${pct}%).`;
+  els.opts.innerHTML = "";
+  els.feedback.style.display = "block";
+  els.feedback.innerHTML = `
+    <strong>Resumen:</strong> Revisa tus respuestas abajo o presiona “Reiniciar” para un nuevo conjunto aleatorio.
+  `;
+  els.nextBtn.style.display = "none";
+  els.skipBtn.style.display = "none";
+  els.qTag.textContent = "Finalizado";
+
+  // Render review
+  els.review.style.display = "grid";
+  els.review.innerHTML = "";
+  quiz.history.forEach((h, i)=>{
+    const div = document.createElement("div");
+    div.className = "reviewItem";
+    const ok = h.correct;
+    const chosenText = h.options[h.chosen] ?? "—";
+    const answerText = h.options[h.answer] ?? "—";
+    div.innerHTML = `
+      <div>
+        <span class="tag ${ok ? "ok":"bad"}">${ok ? "Correcta":"Incorrecta"}</span>
+        <span class="tag">${h.sourceTag || "—"}</span>
+      </div>
+      <div style="margin-top:8px;font-weight:950;line-height:1.25">${i+1}. ${h.q}</div>
+      <div class="mini">
+        <div><strong>Tu respuesta:</strong> ${chosenText}</div>
+        <div><strong>Correcta:</strong> ${answerText}</div>
+        <div style="margin-top:6px"><strong>Explicación:</strong> ${h.explain || "—"}</div>
+      </div>
+    `;
+    els.review.appendChild(div);
+  });
+
+  // progress full
+  els.barFill.style.width = "100%";
+  els.kpi.textContent = `${total}/${total} • Puntaje: ${quiz.score}`;
+}
+
+function renderQuestion(){
+  updateProgress();
+
+  const total = quiz.qset.length;
+  if(quiz.idx >= total){
+    endQuiz();
+    return;
+  }
+
+  const q = quiz.qset[quiz.idx];
+  quiz.answered = false;
+
+  els.review.style.display = "none";
+  els.feedback.style.display = "none";
+  els.feedback.innerHTML = "";
+  els.nextBtn.style.display = "none";
+  els.skipBtn.style.display = "inline-block";
+  els.qTag.textContent = `${q.type === "tf" ? "Verdadero/Falso" : "Opción múltiple"} • ${q.sourceTag || "—"}`;
+
+  els.qtitle.textContent = `${quiz.idx+1}/${total} — ${q.q}`;
+
+  // options
+  const options = q.options || [];
+  els.opts.innerHTML = "";
+  options.forEach((opt, i)=>{
+    const btn = document.createElement("button");
+    btn.className = "opt";
+    btn.innerHTML = `<span class="letter">${q.type==="tf" ? (i===0?"V":"F") : letters(i)}</span><span>${opt}</span>`;
+    btn.addEventListener("click", ()=> chooseOption(i));
+    els.opts.appendChild(btn);
+  });
+}
+
+function chooseOption(chosenIdx){
+  if(!quiz || quiz.answered) return;
+  quiz.answered = true;
+
+  const q = quiz.qset[quiz.idx];
+  const correctIdx = q.answer;
+  const optButtons = [...els.opts.querySelectorAll(".opt")];
+
+  optButtons.forEach((b, i)=>{
+    b.disabled = true;
+    if(i === correctIdx) b.classList.add("correct");
+    if(i === chosenIdx && chosenIdx !== correctIdx) b.classList.add("wrong");
+  });
+
+  const ok = chosenIdx === correctIdx;
+  if(ok) quiz.score += 1;
+
+  const name = greetName();
+  els.feedback.style.display = "block";
+  els.feedback.innerHTML = ok
+    ? `<strong>¡Bien${name}!</strong> ✅ ${q.explain || ""}`
+    : `<strong>Ups${name}.</strong> ❌ ${q.explain || ""}`;
+
+  quiz.history.push({
+    id: q.id,
+    chosen: chosenIdx,
+    correct: ok,
+    q: q.q,
+    options: q.options,
+    answer: q.answer,
+    explain: q.explain,
+    sourceTag: q.sourceTag
+  });
+
+  els.nextBtn.style.display = "inline-block";
+  updateProgress();
+}
+
+/** =========================================================
+ *  7) Eventos UI
+ * ========================================================= */
+els.startBtn.addEventListener("click", ()=>{
+  buildQuiz();
+});
+els.resetBtn.addEventListener("click", ()=>{
+  buildQuiz(); // reinicia con nuevo conjunto aleatorio del banco actual
+});
+els.newSessionBtn.addEventListener("click", ()=>{
+  sessionId = uid();
+  updateHeader();
+});
+
+els.nextBtn.addEventListener("click", ()=>{
+  if(!quiz) return;
+  quiz.idx += 1;
+  renderQuestion();
+});
+
+els.skipBtn.addEventListener("click", ()=>{
+  if(!quiz) return;
+
+  // registrar como omitida (sin puntaje)
+  const q = quiz.qset[quiz.idx];
+  quiz.history.push({
+    id: q.id,
+    chosen: -1,
+    correct: false,
+    q: q.q,
+    options: q.options,
+    answer: q.answer,
+    explain: "Pregunta omitida.",
+    sourceTag: q.sourceTag
+  });
+
+  quiz.idx += 1;
+  renderQuestion();
+});
+
+/** =========================================================
+ *  8) Init
+ * ========================================================= */
+renderTabs();
+updateHeader();
+updateProgress();
+</script>
+</body>
+</html>
